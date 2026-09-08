@@ -1,0 +1,47 @@
+# Installed by Quiz Gate. The pull request head is deliberately never checked out.
+name: Quiz Gate
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+  id-token: write
+
+jobs:
+  quiz:
+    if: >-
+      github.event_name == 'pull_request_target' ||
+      github.event.issue.pull_request != null
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: quiz-gate-${{ github.event.issue.number || github.event.pull_request.number }}
+      cancel-in-progress: false
+    steps:
+      - name: Check out trusted Quiz Gate files
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.base_ref || github.event.repository.default_branch }}
+          sparse-checkout: |
+            .github/quiz-gate
+            .quiz-gate.yml
+          persist-credentials: false
+
+      - name: Generate or grade the quiz
+        uses: ./.github/quiz-gate
+        with:
+          github_token: ${{ github.token }}
+          api_key: ${{ secrets.QUIZ_GATE_API_KEY }}
+          bedrock_api_key: ${{ secrets.QUIZ_GATE_BEDROCK_API_KEY }}
+          aws_access_key_id: ${{ secrets.QUIZ_GATE_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.QUIZ_GATE_AWS_SECRET_ACCESS_KEY }}
+          aws_session_token: ${{ secrets.QUIZ_GATE_AWS_SESSION_TOKEN }}
+          state_secret: ${{ secrets.QUIZ_GATE_STATE_SECRET }}
+          attestation_url: "https://quiz-gate.vercel.app/github/attest"
+          attestation_audience: "quiz-gate"
