@@ -5,7 +5,7 @@ enabled: true
 provider:
   # openai | chatgpt | anthropic | claude | bedrock | sakana | openai-compatible
   kind: openai
-  model: openai.gpt-5.6-luna
+  model: gpt-5.6-luna
   # OpenAI-compatible providers may select responses or chat.
   api: responses
   # Sakana and generic OpenAI-compatible providers require their API base URL.
