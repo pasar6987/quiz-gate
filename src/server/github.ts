@@ -1,3 +1,4 @@
+import { createPrivateKey } from "node:crypto";
 import { importPKCS8, SignJWT } from "jose";
 import type { ServerEnv } from "./env.js";
 
@@ -64,6 +65,12 @@ interface PullRequestRecord {
   html_url: string;
 }
 
+export function normalizePrivateKey(privateKey: string): string {
+  return createPrivateKey(privateKey)
+    .export({ format: "pem", type: "pkcs8" })
+    .toString();
+}
+
 export class GitHubAppClient {
   readonly #env: ServerEnv;
 
@@ -72,7 +79,7 @@ export class GitHubAppClient {
   }
 
   async #appJwt(): Promise<string> {
-    const key = await importPKCS8(this.#env.privateKey, "RS256");
+    const key = await importPKCS8(normalizePrivateKey(this.#env.privateKey), "RS256");
     const now = Math.floor(Date.now() / 1_000);
     return new SignJWT({})
       .setProtectedHeader({ alg: "RS256" })
