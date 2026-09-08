@@ -2,6 +2,7 @@
 version: 1
 enabled: true
 
+# 테스트 아닌데 그냥 문제용으로
 # permission-fix verification trigger
 provider:
   # openai | chatgpt | anthropic | claude | bedrock | sakana | openai-compatible
