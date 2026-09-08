@@ -1,7 +1,7 @@
 # Quiz Gate configuration. Secrets stay in GitHub Actions; never put keys here.
 version: 1
 enabled: true
-#테스트용
+
 # permission-fix verification trigger
 provider:
   # openai | chatgpt | anthropic | claude | bedrock | sakana | openai-compatible
