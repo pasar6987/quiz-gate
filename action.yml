@@ -1,0 +1,42 @@
+name: Quiz Gate
+description: Generate and grade a pull-request comprehension quiz with the repository owner's LLM credentials.
+author: Quiz Gate contributors
+inputs:
+  github_token:
+    description: Ephemeral GITHUB_TOKEN for the current repository.
+    required: true
+  api_key:
+    description: API key for OpenAI, Anthropic, Sakana, or another OpenAI-compatible provider.
+    required: false
+  bedrock_api_key:
+    description: Amazon Bedrock bearer API key.
+    required: false
+  aws_access_key_id:
+    description: AWS access key ID when Bedrock bearer authentication is not used.
+    required: false
+  aws_secret_access_key:
+    description: AWS secret access key.
+    required: false
+  aws_session_token:
+    description: Optional AWS session token.
+    required: false
+  state_secret:
+    description: Optional stable encryption secret. Defaults to the active provider credential.
+    required: false
+  attestation_url:
+    description: Quiz Gate server endpoint that verifies GitHub OIDC and owns the required check.
+    required: true
+  attestation_audience:
+    description: Expected audience in the GitHub OIDC token.
+    default: quiz-gate
+    required: false
+  config_path:
+    description: Configuration path, always read from the pull request base commit.
+    default: .quiz-gate.yml
+    required: false
+runs:
+  using: node20
+  main: dist/action/index.js
+branding:
+  icon: check-square
+  color: purple
