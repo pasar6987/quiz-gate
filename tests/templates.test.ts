@@ -13,6 +13,8 @@ describe("installed workflow", () => {
     expect(workflow).toContain("github.base_ref");
     expect(workflow).not.toContain("github.event.pull_request.head");
     expect(workflow).toContain("id-token: write");
+    expect(workflow).toContain("pull-requests: write");
+    expect(workflow).not.toContain("pull-requests: read");
     expect(workflow).not.toContain("contents: write");
     expect(workflow).toContain("Start Quiz Gate check");
     expect(workflow).toContain("https://quiz-gate.example/github/attest");
