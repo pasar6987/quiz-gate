@@ -14,6 +14,10 @@ describe("installed workflow", () => {
     expect(workflow).not.toContain("github.event.pull_request.head");
     expect(workflow).toContain("id-token: write");
     expect(workflow).not.toContain("contents: write");
+    expect(workflow).toContain("Start Quiz Gate check");
+    expect(workflow).toContain("https://quiz-gate.example/github/attest");
+    expect(workflow).toContain("-X POST");
+    expect(workflow).toContain("status: \"in_progress\"");
     expect(() => parse(workflow)).not.toThrow();
   });
 });
