@@ -34,6 +34,47 @@ jobs:
             .quiz-gate.yml
           persist-credentials: false
 
+      - name: Start Quiz Gate check
+        if: github.event_name == 'pull_request_target'
+        shell: bash
+        env:
+          QUIZ_GATE_ATTESTATION_URL: "https://quiz-gate.vercel.app/github/attest"
+          QUIZ_GATE_ATTESTATION_AUDIENCE: "quiz-gate"
+        run: |
+          set -euo pipefail
+
+          separator='?'
+          if [[ "$ACTIONS_ID_TOKEN_REQUEST_URL" == *'?'* ]]; then
+            separator='&'
+          fi
+          encoded_audience="$(jq -rn --arg value "$QUIZ_GATE_ATTESTATION_AUDIENCE" '$value | @uri')"
+          oidc_url="$ACTIONS_ID_TOKEN_REQUEST_URL$separator""audience=$encoded_audience"
+          oidc_response="$(curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$oidc_url")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_response")"
+
+          repository="$(jq -er '.repository.full_name' "$GITHUB_EVENT_PATH")"
+          repository_id="$(jq -er '.repository.id | tostring' "$GITHUB_EVENT_PATH")"
+          pr_number="$(jq -er '.pull_request.number' "$GITHUB_EVENT_PATH")"
+          head_sha="$(jq -er '.pull_request.head.sha' "$GITHUB_EVENT_PATH")"
+          payload="$(jq -nc \
+            --arg repository "$repository" \
+            --arg repository_id "$repository_id" \
+            --argjson pr_number "$pr_number" \
+            --arg head_sha "$head_sha" \
+            --arg run_id "$GITHUB_RUN_ID" \
+            '{version: 1, repository: $repository, repository_id: $repository_id, pr_number: $pr_number, head_sha: $head_sha, status: "in_progress", run_id: $run_id}')"
+
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $oidc_token" \
+            -H "Content-Type: application/json" \
+            --data "$payload" \
+            "$QUIZ_GATE_ATTESTATION_URL" \
+            > /dev/null
+          echo "Quiz Gate check started."
+
       - name: Generate or grade the quiz
         uses: ./.github/quiz-gate
         with:
