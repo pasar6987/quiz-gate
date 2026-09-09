@@ -1,3 +1,5 @@
+![이미지](https://raw.githubusercontent.com/pasar6987/quiz-gate/main/asset/image.png)
+
 # Quiz Gate
 
 Quiz Gate is an open-source, bring-your-own-key GitHub merge gate. It asks the pull request author a configurable multiple-choice quiz about their change and publishes a GitHub App-owned **Quiz Gate** check that can be required before merge.
